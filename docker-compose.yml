@@ -1,0 +1,34 @@
+services:
+  frontend:
+    build: ./templates
+    container_name: Frontend
+    ports:
+      - "80:80"
+    networks:
+      - my_network
+    depends_on:
+      - backend
+
+  backend:
+    build: ./
+    container_name: Backend
+    ports:
+      - "5000:5000"
+    networks:
+      - my_network
+    volumes:
+      - ./urls.db:/app/urls.db  # لو عايز تحفظ البيانات برا الكونتينر
+    depends_on:
+      - database
+
+  database:
+    image: mysql:latest
+    container_name: mysql_database
+    ports:
+      - "3306:3306"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
