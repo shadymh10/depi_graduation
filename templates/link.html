@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIPHERLINK | Obfuscation Protocol</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='link.css') }}">
+</head>
+<body class="bg-black text-white">
+
+<div id="app" class="terminal-window w-full max-w-lg mx-auto p-6 md:p-8 rounded-lg">
+  <div class="border-b border-gray-700 pb-4 mb-6">
+    <h1 class="text-3xl font-bold mb-1 text-white">
+      <span class="text-cyan-400">&gt;</span> CIPHERLINK // Obfuscation Protocol
+    </h1>
+    <p id="status-line" class="text-xs text-gray-500">
+      [STATUS: ONLINE] [PROTOCOL: BASE62-ENCRYPT] [API: GEMINI_V2.5-FLASH]
+    </p>
+  </div>
+
+  <form id="shortenForm" class="space-y-4">
+    <label for="longUrl" class="block text-sm uppercase tracking-wider text-gray-400">
+      &gt; INPUT TARGET URL FOR ENCODING:
+    </label>
+    <input type="url" id="longUrl" name="longUrl"
+           placeholder="https://your.extremely.long/path/to/data"
+           required
+           class="terminal-input w-full p-3 rounded text-sm placeholder-gray-600">
+    <button type="submit" id="shortenButton"
+            class="terminal-button w-full p-3 uppercase font-bold rounded flex items-center justify-center">
+      <span id="button-text">INITIATE SHORTENING SEQUENCE</span>
+      <div id="loader" class="loader ml-3 hidden"></div>
+    </button>
+  </form>
+
+  <div id="output-area" class="mt-8 pt-6 border-t border-gray-800 hidden">
+    <p class="text-sm uppercase tracking-wider mb-3 text-gray-400">
+      &gt; ENCODING COMPLETE: [ACCESS GRANTED]
+    </p>
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 p-4 rounded bg-gray-900 border border-gray-700">
+      <div class="flex-grow">
+        <p class="text-xs text-gray-500">GENERATED SHORT CODE:</p>
+        <code id="shortened-url-display" class="break-all text-xl font-bold text-cyan-400"></code>
+      </div>
+      <button id="copyButton"
+              class="terminal-button p-2 text-xs uppercase rounded w-full sm:w-auto flex-shrink-0">
+        <span id="copy-text">COPY HASH</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='link.js') }}"></script>
+</body>
+</html>
