@@ -151,8 +151,8 @@ https://github.com/user-attachments/assets/a6eb292d-1c09-4d8a-890f-90b2e128577f
 
 ## 🤝 Contributers
 - Hesham Mohamed Elngar
-- Shady
-- Waleed
+- Shady MOhamed Gad 
+- Waleed mohamed
 - Mostafa Saad
 
 
