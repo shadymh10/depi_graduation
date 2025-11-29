@@ -1,0 +1,98 @@
+groups:
+  - name: url_shortener_alerts
+    rules:
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(flask_http_request_total{status=~"5.."}[5m]))
+            /
+            sum(rate(flask_http_request_total[5m]))
+          ) * 100 > 5
+        for: 30s
+        labels:
+          severity: critical
+          service: url-shortener
+        annotations:
+          summary: "High error rate detected in URL shortener"
+          description: "Error rate is above 5% for more than 2 minutes"
+          value: "{{ $value }}%"
+
+      # High Latency Alert
+      - alert: HighResponseTime
+        expr: |
+          histogram_quantile(0.95, rate(flask_http_request_duration_seconds_bucket[5m])) > 1
+        for: 30s
+        labels:
+          severity: warning
+          service: url-shortener
+        annotations:
+          summary: "High response time detected"
+          description: "95th percentile response time is above 1 second"
+          value: "{{ $value }}s"
+
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: |
+          up{job="url-shortener"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: url-shortener
+        annotations:
+          summary: "URL shortener service is down"
+          description: "Service has been down for more than 1 minute"
+          value: "Service unavailable"
+
+      # No URL Creations Alert
+      - alert: NoURLCreations
+        expr: |
+          rate(url_shortener_creations_total[15m]) == 0
+        for: 40s
+        labels:
+          severity: warning
+          service: url-shortener
+        annotations:
+          summary: "No URL creations in the last 15 minutes"
+          description: "No new URLs have been created for 15 minutes"
+          value: "0 creations"
+
+      # High 404 Error Rate
+      - alert: High404Rate
+        expr: |
+          rate(flask_http_request_total{status="404"}[5m]) > 0.1
+        for: 30s
+        labels:
+          severity: warning
+          service: url-shortener
+        annotations:
+          summary: "High rate of 404 errors"
+          description: "404 error rate is above 0.1 requests per second"
+          value: "{{ $value }} errors/sec"
+
+      # Database Connection Issues
+      - alert: DatabaseErrors
+        expr: |
+          rate(url_shortener_custom_errors_total{error_type=~"database|integrity"}[5m]) > 0.05
+        for: 20s
+        labels:
+          severity: critical
+          service: url-shortener
+        annotations:
+          summary: "Database errors detected"
+          description: "High rate of database-related errors"
+          value: "{{ $value }} errors/sec"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          process_resident_memory_bytes{job="url-shortener"} > 100000000
+        for: 50s
+        labels:
+          severity: warning
+          service: url-shortener
+        annotations:
+          summary: "High memory usage"
+          description: "Process memory usage is above 100MB"
+          value: "{{ $value }} bytes"
+

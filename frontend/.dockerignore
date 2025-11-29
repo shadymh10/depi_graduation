@@ -1,0 +1,24 @@
+# Development files
+.git/
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+
+# Environment files
+.env
+.env.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

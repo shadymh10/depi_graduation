@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - URL Shortener</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="/" class="text-xl font-bold"><i class="fas fa-link mr-2"></i>ShortURL</a>
+                <div class="space-x-4">
+                    <a href="/" class="hover:text-blue-200">Home</a>
+                    <a href="/dashboard.html" class="hover:text-blue-200">Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-6xl mx-auto">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard</h1>
+
+            <div id="loading" class="text-center py-8">
+                <i class="fas fa-spinner fa-spin text-blue-500 text-2xl mb-4"></i>
+                <p class="text-gray-600">Loading dashboard data...</p>
+            </div>
+
+            <div id="error" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg hidden">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
+                    <span id="errorMessage" class="text-red-700"></span>
+                </div>
+            </div>
+
+            <div id="dashboardContent" class="hidden">
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow text-center">
+                        <div class="text-2xl font-bold text-blue-600" id="totalUrls">0</div>
+                        <div class="text-sm text-gray-600">Total URLs</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow text-center">
+                        <div class="text-2xl font-bold text-green-600" id="totalClicks">0</div>
+                        <div class="text-sm text-gray-600">Total Clicks</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow text-center">
+                        <div class="text-2xl font-bold text-purple-600" id="activeUrls">0</div>
+                        <div class="text-sm text-gray-600">Active URLs</div>
+                    </div>
+                </div>
+
+                <!-- Recent URLs -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Recent URLs</h2>
+                    
+                    <div id="recentUrls">
+                        <!-- URLs will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mt-8 text-center">
+                    <a 
+                        href="/" 
+                        class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200 font-medium"
+                    >
+                        <i class="fas fa-plus mr-2"></i>Create New Short URL
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2024 URL Shortener. Built with Microservices & Docker.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Load dashboard data
+        loadDashboard();
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/dashboard');
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to load dashboard data');
+                }
+
+                // Hide loading, show content
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('dashboardContent').classList.remove('hidden');
+
+                // Populate stats
+                document.getElementById('totalUrls').textContent = data.total_urls;
+                document.getElementById('totalClicks').textContent = data.total_clicks;
+                document.getElementById('activeUrls').textContent = data.active_urls;
+
+                // Populate recent URLs
+                const recentUrlsContainer = document.getElementById('recentUrls');
+                if (data.recent_urls && data.recent_urls.length > 0) {
+                    recentUrlsContainer.innerHTML = `
+                        <div class="overflow-x-auto">
+                            <table class="w-full table-auto">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Short Code</th>
+                                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Original URL</th>
+                                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Created</th>
+                                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Clicks</th>
+                                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    ${data.recent_urls.map(url => `
+                                        <tr>
+                                            <td class="px-4 py-3">
+                                                <span class="font-mono text-blue-600">${url.short_code}</span>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="max-w-xs truncate text-sm text-gray-600" title="${url.original_url}">
+                                                    ${url.original_url}
+                                                </div>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-gray-600">${new Date(url.created_at).toLocaleDateString()}</td>
+                                            <td class="px-4 py-3">
+                                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
+                                                    ${url.click_count}
+                                                </span>
+                                            </td>
+                                            <td class="px-4 py-3">
+                                                <div class="flex space-x-2">
+                                                    <a 
+                                                        href="/${url.short_code}" 
+                                                        target="_blank"
+                                                        class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition duration-200"
+                                                    >
+                                                        Visit
+                                                    </a>
+                                                    <a 
+                                                        href="/stats.html?code=${url.short_code}" 
+                                                        class="px-3 py-1 bg-gray-600 text-white rounded text-sm hover:bg-gray-700 transition duration-200"
+                                                    >
+                                                        Stats
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                } else {
+                    recentUrlsContainer.innerHTML = `
+                        <div class="text-center py-8">
+                            <i class="fas fa-inbox text-gray-400 text-4xl mb-4"></i>
+                            <p class="text-gray-600">No URLs created yet</p>
+                            <a href="/" class="text-blue-600 hover:text-blue-700 mt-2 inline-block">Create your first short URL</a>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                showError(error.message);
+            }
+        }
+
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

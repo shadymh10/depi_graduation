@@ -1,0 +1,54 @@
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.python-version
+
+# Environment
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Secrets
+*.pem
+*.key
+*.crt
+secrets/
+config/secret*
+
+# Temporary files
+tmp/
+temp/

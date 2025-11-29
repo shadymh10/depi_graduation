@@ -1,0 +1,66 @@
+global:
+  slack_api_url: 'https://hooks.slack.com/services/XXXXXXXXXXXXXXX/XXXXXXXXXXX'
+  resolve_timeout: 1m
+
+route:
+  group_by: ['alertname', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'slack-url-shortener'
+
+  routes:
+    # High priority alerts - notify immediately
+    - match:
+        severity: critical
+      group_interval: 5s
+      repeat_interval: 5m
+      receiver: 'slack-url-shortener-critical'
+
+    # Medium priority alerts
+    - match:
+        severity: warning
+      group_interval: 30s
+      repeat_interval: 15m
+      receiver: 'slack-url-shortener'
+
+receivers:
+  - name: 'slack-url-shortener'
+    slack_configs:
+      - channel: '#url-shortner'
+        title: '{{ if eq .Status "firing" }}{{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}{{ else }}✅ RESOLVED: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}{{ end }}'
+        text: |-
+          {{ range .Alerts }}
+            *Status:* {{ .Status }}
+            *Alert:* {{ .Annotations.summary }}
+            *Description:* {{ .Annotations.description }}
+            *Value:* {{ .Annotations.value }}
+            *Time:* {{ .StartsAt }}
+            *Graph:* <{{ .GeneratorURL }}|View in Prometheus>
+          {{ end }}
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+  - name: 'slack-url-shortener-critical'
+    slack_configs:
+      - channel: '#url-shortner'
+        title: '{{ if eq .Status "firing" }}🚨 CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}{{ else }}✅ RESOLVED: CRITICAL: {{ .GroupLabels.alertname }} - {{ .GroupLabels.service }}{{ end }}'
+        text: |-
+          {{ range .Alerts }}
+            *Status:* {{ .Status }}
+            *🚨 CRITICAL ALERT!*
+            *Issue:* {{ .Annotations.summary }}
+            *Details:* {{ .Annotations.description }}
+            *Current Value:* {{ .Annotations.value }}
+            *Started:* {{ .StartsAt }}
+            *Dashboard:* <{{ .GeneratorURL }}|View Details>
+          {{ end }}
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'service']
